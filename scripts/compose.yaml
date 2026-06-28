@@ -1,7 +1,10 @@
 services:
   memos:
-    image: neosmemo/memos:stable
+    # 部署用镜像：由 .github/workflows/deploy.yml 构建并推送到 GHCR。
+    # 服务器上把本文件放到 DEPLOY_PATH，docker compose pull 即可更新。
+    image: ghcr.io/ihavebb/memos:latest
     container_name: memos
+    restart: unless-stopped
     volumes:
       - ~/.memos/:/var/opt/memos
     ports:

@@ -1,0 +1,87 @@
+name: Build and Deploy
+
+# 推送 main 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR → SSH 到服务器拉新镜像重启。
+# 也可在 Actions 页面手动触发（可指定分支）。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.repository }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write # 推送到 GHCR 所需
+
+env:
+  # -> ghcr.io/ihavebb/memos （仓库名小写，GHCR 要求）
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # ---- 1. 编前端：产物落到 server/router/frontend/dist（Dockerfile 会 embed）----
+      - uses: pnpm/action-setup@v4.2.0
+        with:
+          version: 11.0.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - run: pnpm release
+        working-directory: web
+
+      # ---- 2. 登录 GHCR（用自带 GITHUB_TOKEN，无需额外 secret）----
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # ---- 3. 生成镜像标签：latest + sha-xxxxxx ----
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+
+      # ---- 4. 构建 amd64 镜像并推送 ----
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./scripts/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ github.ref_name }}
+            COMMIT=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- 5. SSH 到服务器：拉新镜像 + 重启 ----
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f

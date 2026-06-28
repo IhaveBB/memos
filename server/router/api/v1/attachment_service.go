@@ -499,29 +499,33 @@ func SaveAttachmentBlob(ctx context.Context, profile *profile.Profile, stores *s
 		if err != nil {
 			return errors.Wrap(err, "Failed to upload via s3 client")
 		}
-		switch s3Config.GetUrlMode() {
-		case storepb.StorageS3Config_CUSTOM_DOMAIN:
-			// Custom-domain (legacy) mode: expose a stable public URL "{url_prefix}/{key}".
-			// The bucket must be publicly readable; the URL is unsigned and never expires,
-			// so the s3presign runner skips these attachments.
-			create.Reference = strings.TrimRight(s3Config.GetUrlPrefix(), "/") + "/" + key
-		default: // S3_URL_MODE_UNSPECIFIED / PRESIGNED — current presigned-URL behavior.
+		// Decide the public URL strategy. Custom-domain mode exposes a stable
+		// "{url_prefix}/{key}" URL (the bucket must be public-readable); everything
+		// else — including a misconfigured CUSTOM_DOMAIN with an empty url_prefix —
+		// falls back to a presigned URL so the attachment is always reachable.
+		presigned := s3Config.GetUrlMode() != storepb.StorageS3Config_CUSTOM_DOMAIN || s3Config.GetUrlPrefix() == ""
+		if presigned {
 			presignURL, err := s3Client.PresignGetObject(ctx, key)
 			if err != nil {
 				return errors.Wrap(err, "Failed to presign via s3 client")
 			}
 			create.Reference = presignURL
+		} else {
+			create.Reference = strings.TrimRight(s3Config.GetUrlPrefix(), "/") + "/" + key
 		}
 		create.Blob = nil
 		create.StorageType = storepb.AttachmentStorageType_S3
 		payload := ensureAttachmentPayload(create.Payload)
-		payload.Payload = &storepb.AttachmentPayload_S3Object_{
-			S3Object: &storepb.AttachmentPayload_S3Object{
-				S3Config:          s3Config,
-				Key:               key,
-				LastPresignedTime: timestamppb.New(time.Now()),
-			},
+		s3Object := &storepb.AttachmentPayload_S3Object{
+			S3Config: s3Config,
+			Key:      key,
 		}
+		// Only presigned URLs expire and need refresh; custom-domain URLs are stable,
+		// so the s3presign runner skips attachments whose snapshot config is CUSTOM_DOMAIN.
+		if presigned {
+			s3Object.LastPresignedTime = timestamppb.New(time.Now())
+		}
+		payload.Payload = &storepb.AttachmentPayload_S3Object_{S3Object: s3Object}
 		create.Payload = payload
 	}
 

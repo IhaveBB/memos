@@ -98,6 +98,11 @@ func (r *Runner) CheckAndPresign(ctx context.Context) {
 				slog.Error("S3 config is not found")
 				continue
 			}
+			// Custom-domain attachments expose a stable, non-presigned public URL;
+			// never overwrite it with a presigned URL.
+			if s3Config.GetUrlMode() == storepb.StorageS3Config_CUSTOM_DOMAIN {
+				continue
+			}
 
 			s3Client, err := s3.NewClient(ctx, s3Config)
 			if err != nil {

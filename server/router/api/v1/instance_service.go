@@ -449,6 +449,8 @@ func convertInstanceStorageSettingFromStore(settingpb *storepb.InstanceStorageSe
 			Bucket:                settingpb.S3Config.Bucket,
 			UsePathStyle:          settingpb.S3Config.UsePathStyle,
 			InsecureSkipTlsVerify: settingpb.S3Config.InsecureSkipTlsVerify,
+			UrlMode:               v1pb.InstanceSetting_StorageSetting_S3Config_S3UrlMode(settingpb.S3Config.UrlMode),
+			UrlPrefix:             settingpb.S3Config.UrlPrefix,
 		}
 	}
 	return setting
@@ -472,6 +474,8 @@ func convertInstanceStorageSettingToStore(setting *v1pb.InstanceSetting_StorageS
 			Bucket:                setting.S3Config.Bucket,
 			UsePathStyle:          setting.S3Config.UsePathStyle,
 			InsecureSkipTlsVerify: setting.S3Config.InsecureSkipTlsVerify,
+			UrlMode:               storepb.StorageS3Config_S3UrlMode(setting.S3Config.UrlMode),
+			UrlPrefix:             setting.S3Config.UrlPrefix,
 		}
 	}
 	return settingpb

@@ -197,6 +197,58 @@ func (InstanceStorageSetting_StorageType) EnumDescriptor() ([]byte, []int) {
 	return file_store_instance_setting_proto_rawDescGZIP(), []int{4, 0}
 }
 
+// S3UrlMode controls how public attachment URLs are produced for S3 objects.
+type StorageS3Config_S3UrlMode int32
+
+const (
+	StorageS3Config_S3_URL_MODE_UNSPECIFIED StorageS3Config_S3UrlMode = 0
+	// PRESIGNED generates short-lived presigned URLs (default). Bucket may stay private.
+	StorageS3Config_PRESIGNED StorageS3Config_S3UrlMode = 1
+	// CUSTOM_DOMAIN builds a stable public URL "{url_prefix}/{key}". Bucket must be public-readable.
+	StorageS3Config_CUSTOM_DOMAIN StorageS3Config_S3UrlMode = 2
+)
+
+// Enum value maps for StorageS3Config_S3UrlMode.
+var (
+	StorageS3Config_S3UrlMode_name = map[int32]string{
+		0: "S3_URL_MODE_UNSPECIFIED",
+		1: "PRESIGNED",
+		2: "CUSTOM_DOMAIN",
+	}
+	StorageS3Config_S3UrlMode_value = map[string]int32{
+		"S3_URL_MODE_UNSPECIFIED": 0,
+		"PRESIGNED":               1,
+		"CUSTOM_DOMAIN":           2,
+	}
+)
+
+func (x StorageS3Config_S3UrlMode) Enum() *StorageS3Config_S3UrlMode {
+	p := new(StorageS3Config_S3UrlMode)
+	*p = x
+	return p
+}
+
+func (x StorageS3Config_S3UrlMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StorageS3Config_S3UrlMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_store_instance_setting_proto_enumTypes[3].Descriptor()
+}
+
+func (StorageS3Config_S3UrlMode) Type() protoreflect.EnumType {
+	return &file_store_instance_setting_proto_enumTypes[3]
+}
+
+func (x StorageS3Config_S3UrlMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StorageS3Config_S3UrlMode.Descriptor instead.
+func (StorageS3Config_S3UrlMode) EnumDescriptor() ([]byte, []int) {
+	return file_store_instance_setting_proto_rawDescGZIP(), []int{5, 0}
+}
+
 type InstanceSetting struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Key   InstanceSettingKey     `protobuf:"varint,1,opt,name=key,proto3,enum=memos.store.InstanceSettingKey" json:"key,omitempty"`
@@ -677,8 +729,14 @@ type StorageS3Config struct {
 	// to the S3 endpoint. Only enable this for trusted endpoints that use a self-signed
 	// certificate; it removes protection against man-in-the-middle attacks.
 	InsecureSkipTlsVerify bool `protobuf:"varint,7,opt,name=insecure_skip_tls_verify,json=insecureSkipTlsVerify,proto3" json:"insecure_skip_tls_verify,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	// url_mode selects the public URL strategy. Unspecified or PRESIGNED preserves the
+	// legacy presigned-URL behavior.
+	UrlMode StorageS3Config_S3UrlMode `protobuf:"varint,8,opt,name=url_mode,json=urlMode,proto3,enum=memos.store.StorageS3Config_S3UrlMode" json:"url_mode,omitempty"`
+	// url_prefix is the public base URL used when url_mode == CUSTOM_DOMAIN,
+	// e.g. https://cdn.example.com/memos.
+	UrlPrefix     string `protobuf:"bytes,9,opt,name=url_prefix,json=urlPrefix,proto3" json:"url_prefix,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StorageS3Config) Reset() {
@@ -758,6 +816,20 @@ func (x *StorageS3Config) GetInsecureSkipTlsVerify() bool {
 		return x.InsecureSkipTlsVerify
 	}
 	return false
+}
+
+func (x *StorageS3Config) GetUrlMode() StorageS3Config_S3UrlMode {
+	if x != nil {
+		return x.UrlMode
+	}
+	return StorageS3Config_S3_URL_MODE_UNSPECIFIED
+}
+
+func (x *StorageS3Config) GetUrlPrefix() string {
+	if x != nil {
+		return x.UrlPrefix
+	}
+	return ""
 }
 
 type InstanceMemoRelatedSetting struct {
@@ -1349,7 +1421,7 @@ const file_store_instance_setting_proto_rawDesc = "" +
 	"\x18STORAGE_TYPE_UNSPECIFIED\x10\x00\x12\f\n" +
 	"\bDATABASE\x10\x01\x12\t\n" +
 	"\x05LOCAL\x10\x02\x12\x06\n" +
-	"\x02S3\x10\x03\"\x8c\x02\n" +
+	"\x02S3\x10\x03\"\xba\x03\n" +
 	"\x0fStorageS3Config\x12\"\n" +
 	"\raccess_key_id\x18\x01 \x01(\tR\vaccessKeyId\x12*\n" +
 	"\x11access_key_secret\x18\x02 \x01(\tR\x0faccessKeySecret\x12\x1a\n" +
@@ -1357,7 +1429,14 @@ const file_store_instance_setting_proto_rawDesc = "" +
 	"\x06region\x18\x04 \x01(\tR\x06region\x12\x16\n" +
 	"\x06bucket\x18\x05 \x01(\tR\x06bucket\x12$\n" +
 	"\x0euse_path_style\x18\x06 \x01(\bR\fusePathStyle\x127\n" +
-	"\x18insecure_skip_tls_verify\x18\a \x01(\bR\x15insecureSkipTlsVerify\"\xc5\x01\n" +
+	"\x18insecure_skip_tls_verify\x18\a \x01(\bR\x15insecureSkipTlsVerify\x12A\n" +
+	"\burl_mode\x18\b \x01(\x0e2&.memos.store.StorageS3Config.S3UrlModeR\aurlMode\x12\x1d\n" +
+	"\n" +
+	"url_prefix\x18\t \x01(\tR\turlPrefix\"J\n" +
+	"\tS3UrlMode\x12\x1b\n" +
+	"\x17S3_URL_MODE_UNSPECIFIED\x10\x00\x12\r\n" +
+	"\tPRESIGNED\x10\x01\x12\x11\n" +
+	"\rCUSTOM_DOMAIN\x10\x02\"\xc5\x01\n" +
 	"\x1aInstanceMemoRelatedSetting\x120\n" +
 	"\x14content_length_limit\x18\x03 \x01(\x05R\x12contentLengthLimit\x127\n" +
 	"\x18enable_double_click_edit\x18\x04 \x01(\bR\x15enableDoubleClickEdit\x12\x1c\n" +
@@ -1429,53 +1508,55 @@ func file_store_instance_setting_proto_rawDescGZIP() []byte {
 	return file_store_instance_setting_proto_rawDescData
 }
 
-var file_store_instance_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_store_instance_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_store_instance_setting_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_store_instance_setting_proto_goTypes = []any{
 	(InstanceSettingKey)(0),                          // 0: memos.store.InstanceSettingKey
 	(AIProviderType)(0),                              // 1: memos.store.AIProviderType
 	(InstanceStorageSetting_StorageType)(0),          // 2: memos.store.InstanceStorageSetting.StorageType
-	(*InstanceSetting)(nil),                          // 3: memos.store.InstanceSetting
-	(*InstanceBasicSetting)(nil),                     // 4: memos.store.InstanceBasicSetting
-	(*InstanceGeneralSetting)(nil),                   // 5: memos.store.InstanceGeneralSetting
-	(*InstanceCustomProfile)(nil),                    // 6: memos.store.InstanceCustomProfile
-	(*InstanceStorageSetting)(nil),                   // 7: memos.store.InstanceStorageSetting
-	(*StorageS3Config)(nil),                          // 8: memos.store.StorageS3Config
-	(*InstanceMemoRelatedSetting)(nil),               // 9: memos.store.InstanceMemoRelatedSetting
-	(*InstanceTagMetadata)(nil),                      // 10: memos.store.InstanceTagMetadata
-	(*InstanceTagsSetting)(nil),                      // 11: memos.store.InstanceTagsSetting
-	(*InstanceNotificationSetting)(nil),              // 12: memos.store.InstanceNotificationSetting
-	(*InstanceAISetting)(nil),                        // 13: memos.store.InstanceAISetting
-	(*AIProviderConfig)(nil),                         // 14: memos.store.AIProviderConfig
-	(*TranscriptionConfig)(nil),                      // 15: memos.store.TranscriptionConfig
-	nil,                                              // 16: memos.store.InstanceTagsSetting.TagsEntry
-	(*InstanceNotificationSetting_EmailSetting)(nil), // 17: memos.store.InstanceNotificationSetting.EmailSetting
-	(*color.Color)(nil),                              // 18: google.type.Color
+	(StorageS3Config_S3UrlMode)(0),                   // 3: memos.store.StorageS3Config.S3UrlMode
+	(*InstanceSetting)(nil),                          // 4: memos.store.InstanceSetting
+	(*InstanceBasicSetting)(nil),                     // 5: memos.store.InstanceBasicSetting
+	(*InstanceGeneralSetting)(nil),                   // 6: memos.store.InstanceGeneralSetting
+	(*InstanceCustomProfile)(nil),                    // 7: memos.store.InstanceCustomProfile
+	(*InstanceStorageSetting)(nil),                   // 8: memos.store.InstanceStorageSetting
+	(*StorageS3Config)(nil),                          // 9: memos.store.StorageS3Config
+	(*InstanceMemoRelatedSetting)(nil),               // 10: memos.store.InstanceMemoRelatedSetting
+	(*InstanceTagMetadata)(nil),                      // 11: memos.store.InstanceTagMetadata
+	(*InstanceTagsSetting)(nil),                      // 12: memos.store.InstanceTagsSetting
+	(*InstanceNotificationSetting)(nil),              // 13: memos.store.InstanceNotificationSetting
+	(*InstanceAISetting)(nil),                        // 14: memos.store.InstanceAISetting
+	(*AIProviderConfig)(nil),                         // 15: memos.store.AIProviderConfig
+	(*TranscriptionConfig)(nil),                      // 16: memos.store.TranscriptionConfig
+	nil,                                              // 17: memos.store.InstanceTagsSetting.TagsEntry
+	(*InstanceNotificationSetting_EmailSetting)(nil), // 18: memos.store.InstanceNotificationSetting.EmailSetting
+	(*color.Color)(nil),                              // 19: google.type.Color
 }
 var file_store_instance_setting_proto_depIdxs = []int32{
 	0,  // 0: memos.store.InstanceSetting.key:type_name -> memos.store.InstanceSettingKey
-	4,  // 1: memos.store.InstanceSetting.basic_setting:type_name -> memos.store.InstanceBasicSetting
-	5,  // 2: memos.store.InstanceSetting.general_setting:type_name -> memos.store.InstanceGeneralSetting
-	7,  // 3: memos.store.InstanceSetting.storage_setting:type_name -> memos.store.InstanceStorageSetting
-	9,  // 4: memos.store.InstanceSetting.memo_related_setting:type_name -> memos.store.InstanceMemoRelatedSetting
-	11, // 5: memos.store.InstanceSetting.tags_setting:type_name -> memos.store.InstanceTagsSetting
-	12, // 6: memos.store.InstanceSetting.notification_setting:type_name -> memos.store.InstanceNotificationSetting
-	13, // 7: memos.store.InstanceSetting.ai_setting:type_name -> memos.store.InstanceAISetting
-	6,  // 8: memos.store.InstanceGeneralSetting.custom_profile:type_name -> memos.store.InstanceCustomProfile
+	5,  // 1: memos.store.InstanceSetting.basic_setting:type_name -> memos.store.InstanceBasicSetting
+	6,  // 2: memos.store.InstanceSetting.general_setting:type_name -> memos.store.InstanceGeneralSetting
+	8,  // 3: memos.store.InstanceSetting.storage_setting:type_name -> memos.store.InstanceStorageSetting
+	10, // 4: memos.store.InstanceSetting.memo_related_setting:type_name -> memos.store.InstanceMemoRelatedSetting
+	12, // 5: memos.store.InstanceSetting.tags_setting:type_name -> memos.store.InstanceTagsSetting
+	13, // 6: memos.store.InstanceSetting.notification_setting:type_name -> memos.store.InstanceNotificationSetting
+	14, // 7: memos.store.InstanceSetting.ai_setting:type_name -> memos.store.InstanceAISetting
+	7,  // 8: memos.store.InstanceGeneralSetting.custom_profile:type_name -> memos.store.InstanceCustomProfile
 	2,  // 9: memos.store.InstanceStorageSetting.storage_type:type_name -> memos.store.InstanceStorageSetting.StorageType
-	8,  // 10: memos.store.InstanceStorageSetting.s3_config:type_name -> memos.store.StorageS3Config
-	18, // 11: memos.store.InstanceTagMetadata.background_color:type_name -> google.type.Color
-	16, // 12: memos.store.InstanceTagsSetting.tags:type_name -> memos.store.InstanceTagsSetting.TagsEntry
-	17, // 13: memos.store.InstanceNotificationSetting.email:type_name -> memos.store.InstanceNotificationSetting.EmailSetting
-	14, // 14: memos.store.InstanceAISetting.providers:type_name -> memos.store.AIProviderConfig
-	15, // 15: memos.store.InstanceAISetting.transcription:type_name -> memos.store.TranscriptionConfig
-	1,  // 16: memos.store.AIProviderConfig.type:type_name -> memos.store.AIProviderType
-	10, // 17: memos.store.InstanceTagsSetting.TagsEntry.value:type_name -> memos.store.InstanceTagMetadata
-	18, // [18:18] is the sub-list for method output_type
-	18, // [18:18] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	9,  // 10: memos.store.InstanceStorageSetting.s3_config:type_name -> memos.store.StorageS3Config
+	3,  // 11: memos.store.StorageS3Config.url_mode:type_name -> memos.store.StorageS3Config.S3UrlMode
+	19, // 12: memos.store.InstanceTagMetadata.background_color:type_name -> google.type.Color
+	17, // 13: memos.store.InstanceTagsSetting.tags:type_name -> memos.store.InstanceTagsSetting.TagsEntry
+	18, // 14: memos.store.InstanceNotificationSetting.email:type_name -> memos.store.InstanceNotificationSetting.EmailSetting
+	15, // 15: memos.store.InstanceAISetting.providers:type_name -> memos.store.AIProviderConfig
+	16, // 16: memos.store.InstanceAISetting.transcription:type_name -> memos.store.TranscriptionConfig
+	1,  // 17: memos.store.AIProviderConfig.type:type_name -> memos.store.AIProviderType
+	11, // 18: memos.store.InstanceTagsSetting.TagsEntry.value:type_name -> memos.store.InstanceTagMetadata
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_store_instance_setting_proto_init() }
@@ -1497,7 +1578,7 @@ func file_store_instance_setting_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_store_instance_setting_proto_rawDesc), len(file_store_instance_setting_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      4,
 			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   0,

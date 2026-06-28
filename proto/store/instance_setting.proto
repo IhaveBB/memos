@@ -94,6 +94,15 @@ message InstanceStorageSetting {
 
 // Reference: https://developers.cloudflare.com/r2/examples/aws/aws-sdk-go/
 message StorageS3Config {
+  // S3UrlMode controls how public attachment URLs are produced for S3 objects.
+  enum S3UrlMode {
+    S3_URL_MODE_UNSPECIFIED = 0;
+    // PRESIGNED generates short-lived presigned URLs (default). Bucket may stay private.
+    PRESIGNED = 1;
+    // CUSTOM_DOMAIN builds a stable public URL "{url_prefix}/{key}". Bucket must be public-readable.
+    CUSTOM_DOMAIN = 2;
+  }
+
   string access_key_id = 1;
   string access_key_secret = 2;
   string endpoint = 3;
@@ -104,6 +113,12 @@ message StorageS3Config {
   // to the S3 endpoint. Only enable this for trusted endpoints that use a self-signed
   // certificate; it removes protection against man-in-the-middle attacks.
   bool insecure_skip_tls_verify = 7;
+  // url_mode selects the public URL strategy. Unspecified or PRESIGNED preserves the
+  // legacy presigned-URL behavior.
+  S3UrlMode url_mode = 8;
+  // url_prefix is the public base URL used when url_mode == CUSTOM_DOMAIN,
+  // e.g. https://cdn.example.com/memos.
+  string url_prefix = 9;
 }
 
 message InstanceMemoRelatedSetting {

@@ -14,6 +14,7 @@ import {
   InstanceSetting_Key,
   InstanceSetting_StorageSetting,
   InstanceSetting_StorageSetting_S3Config,
+  InstanceSetting_StorageSetting_S3Config_S3UrlMode,
   InstanceSetting_StorageSetting_S3ConfigSchema,
   InstanceSetting_StorageSetting_StorageType,
   InstanceSetting_StorageSettingSchema,
@@ -27,6 +28,13 @@ import SettingSection from "./SettingSection";
 import useInstanceSettingUpdater, { buildInstanceSettingName } from "./useInstanceSettingUpdater";
 
 const DEFAULT_FILEPATH_TEMPLATE = "assets/{timestamp}_{uuid}_{filename}";
+
+// Treat the unset/unspecified value as PRESIGNED so the UI always shows a concrete
+// selection while preserving the backend's default presigned-URL behavior.
+const normalizeS3UrlMode = (mode?: InstanceSetting_StorageSetting_S3Config_S3UrlMode): InstanceSetting_StorageSetting_S3Config_S3UrlMode =>
+  mode === InstanceSetting_StorageSetting_S3Config_S3UrlMode.CUSTOM_DOMAIN
+    ? InstanceSetting_StorageSetting_S3Config_S3UrlMode.CUSTOM_DOMAIN
+    : InstanceSetting_StorageSetting_S3Config_S3UrlMode.PRESIGNED;
 
 type StorageTypeOption = {
   storageType: InstanceSetting_StorageSetting_StorageType;
@@ -106,6 +114,13 @@ const StorageSection = () => {
       ) {
         return false;
       }
+      // Custom-domain mode requires a public base URL.
+      if (
+        normalizeS3UrlMode(instanceStorageSetting.s3Config?.urlMode) === InstanceSetting_StorageSetting_S3Config_S3UrlMode.CUSTOM_DOMAIN &&
+        !instanceStorageSetting.s3Config?.urlPrefix
+      ) {
+        return false;
+      }
     }
     return !isEqual(originalSetting, instanceStorageSetting);
   }, [instanceStorageSetting, originalSetting]);
@@ -132,7 +147,10 @@ const StorageSection = () => {
     );
   };
 
-  const handleS3FieldChange = (field: keyof InstanceSetting_StorageSetting_S3Config, value: string | boolean) => {
+  const handleS3FieldChange = (
+    field: keyof InstanceSetting_StorageSetting_S3Config,
+    value: string | boolean | InstanceSetting_StorageSetting_S3Config_S3UrlMode,
+  ) => {
     const existing = instanceStorageSetting.s3Config;
     setInstanceStorageSetting(
       create(InstanceSetting_StorageSettingSchema, {
@@ -147,6 +165,8 @@ const StorageSection = () => {
           bucket: existing?.bucket ?? "",
           usePathStyle: existing?.usePathStyle ?? false,
           insecureSkipTlsVerify: existing?.insecureSkipTlsVerify ?? false,
+          urlMode: normalizeS3UrlMode(existing?.urlMode),
+          urlPrefix: existing?.urlPrefix ?? "",
           [field]: value,
         }),
       }),
@@ -343,6 +363,38 @@ const StorageSection = () => {
               onCheckedChange={(checked) => handleS3FieldChange("insecureSkipTlsVerify", checked)}
             />
           </SettingRow>
+
+          <SettingRow label={t("setting.storage.url-mode")} description={t("setting.storage.url-mode-description")} vertical>
+            <RadioGroup
+              className="flex flex-col gap-2"
+              value={String(normalizeS3UrlMode(instanceStorageSetting.s3Config?.urlMode))}
+              onValueChange={(value) => handleS3FieldChange("urlMode", Number(value) as InstanceSetting_StorageSetting_S3Config_S3UrlMode)}
+            >
+              <div className="flex items-center gap-2">
+                <RadioGroupItem value={String(InstanceSetting_StorageSetting_S3Config_S3UrlMode.PRESIGNED)} id="s3-url-mode-presigned" />
+                <Label htmlFor="s3-url-mode-presigned">{t("setting.storage.url-mode-presigned")}</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <RadioGroupItem
+                  value={String(InstanceSetting_StorageSetting_S3Config_S3UrlMode.CUSTOM_DOMAIN)}
+                  id="s3-url-mode-custom-domain"
+                />
+                <Label htmlFor="s3-url-mode-custom-domain">{t("setting.storage.url-mode-custom-domain")}</Label>
+              </div>
+            </RadioGroup>
+          </SettingRow>
+
+          {normalizeS3UrlMode(instanceStorageSetting.s3Config?.urlMode) ===
+            InstanceSetting_StorageSetting_S3Config_S3UrlMode.CUSTOM_DOMAIN && (
+            <SettingRow label={t("setting.storage.url-prefix")} description={t("setting.storage.url-prefix-description")}>
+              <Input
+                className="w-64"
+                placeholder={t("setting.storage.url-prefix-placeholder")}
+                value={instanceStorageSetting.s3Config?.urlPrefix ?? ""}
+                onChange={(e) => handleS3FieldChange("urlPrefix", e.target.value)}
+              />
+            </SettingRow>
+          )}
         </SettingGroup>
       )}
 

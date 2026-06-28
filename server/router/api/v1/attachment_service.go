@@ -499,12 +499,19 @@ func SaveAttachmentBlob(ctx context.Context, profile *profile.Profile, stores *s
 		if err != nil {
 			return errors.Wrap(err, "Failed to upload via s3 client")
 		}
-		presignURL, err := s3Client.PresignGetObject(ctx, key)
-		if err != nil {
-			return errors.Wrap(err, "Failed to presign via s3 client")
+		switch s3Config.GetUrlMode() {
+		case storepb.StorageS3Config_CUSTOM_DOMAIN:
+			// Custom-domain (legacy) mode: expose a stable public URL "{url_prefix}/{key}".
+			// The bucket must be publicly readable; the URL is unsigned and never expires,
+			// so the s3presign runner skips these attachments.
+			create.Reference = strings.TrimRight(s3Config.GetUrlPrefix(), "/") + "/" + key
+		default: // S3_URL_MODE_UNSPECIFIED / PRESIGNED — current presigned-URL behavior.
+			presignURL, err := s3Client.PresignGetObject(ctx, key)
+			if err != nil {
+				return errors.Wrap(err, "Failed to presign via s3 client")
+			}
+			create.Reference = presignURL
 		}
-
-		create.Reference = presignURL
 		create.Blob = nil
 		create.StorageType = storepb.AttachmentStorageType_S3
 		payload := ensureAttachmentPayload(create.Payload)

@@ -1,8 +1,9 @@
-name: Build and Deploy
+name: Build and Push Image
 
-# 推送 custom 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR → SSH 到服务器拉新镜像重启。
-# main 保持为 memos 官方镜像（干净），custom 是累积定制的部署分支。
-# 也可在 Actions 页面手动触发（可指定分支）。
+# 推送 custom 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR（ghcr.io/ihavebb/memos）。
+# 不做 SSH 部署：memos 实际运行在 bbpad 的 docker-compose 里（见 bbpad-frontend 仓库），
+# 由 bbpad 那边 docker compose pull/up memos 来消费本镜像。本 CI 只负责产出镜像。
+# main 保持为 memos 官方镜像（干净），custom 是累积定制的分支。
 on:
   push:
     branches: [custom]
@@ -72,18 +73,3 @@ jobs:
             COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # ---- 5. SSH 到服务器：拉新镜像 + 重启 ----
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script_stop: true
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            docker compose pull
-            docker compose up -d --remove-orphans
-            docker image prune -f

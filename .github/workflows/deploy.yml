@@ -1,10 +1,11 @@
 name: Build and Deploy
 
-# 推送 main 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR → SSH 到服务器拉新镜像重启。
+# 推送 custom 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR → SSH 到服务器拉新镜像重启。
+# main 保持为 memos 官方镜像（干净），custom 是累积定制的部署分支。
 # 也可在 Actions 页面手动触发（可指定分支）。
 on:
   push:
-    branches: [main]
+    branches: [custom]
   workflow_dispatch:
 
 concurrency:

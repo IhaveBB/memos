@@ -1,9 +1,10 @@
-name: Build and Push Image
+name: Build and Deploy
 
-# 推送 custom 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR（ghcr.io/ihavebb/memos）。
-# 不做 SSH 部署：memos 实际运行在 bbpad 的 docker-compose 里（见 bbpad-frontend 仓库），
-# 由 bbpad 那边 docker compose pull/up memos 来消费本镜像。本 CI 只负责产出镜像。
-# main 保持为 memos 官方镜像（干净），custom 是累积定制的分支。
+# 推送 custom 即自动：编前端 → 构建 amd64 镜像 → 推到 GHCR → SSH 到 bbpad 服务器只 pull/up memos 服务。
+# memos 跑在 bbpad 的 docker-compose 里（见 bbpad-frontend 仓库的 docker-compose.prod.yml），
+# 本 CI 只动 memos 这一个服务，不碰 app/backend/mysql/redis。
+# 需要 memos 仓库配 DEPLOY_HOST/PORT/USER/SSH_KEY/PATH（指向 bbpad 同一台服务器、/opt/bbpad-blog 目录）。
+# main 保持为 memos 官方镜像（干净），custom 是累积定制的部署分支。
 on:
   push:
     branches: [custom]
@@ -73,3 +74,35 @@ jobs:
             COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # ---- 5. 检查部署 secrets 是否齐全（不齐全则跳过部署，镜像照常构建推送）----
+      - name: Check deploy secrets
+        id: deploy-config
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          if [ -n "$DEPLOY_HOST" ] && [ -n "$DEPLOY_USER" ] && [ -n "$DEPLOY_SSH_KEY" ] && [ -n "$DEPLOY_PATH" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Deploy secrets are incomplete, skip server deploy."
+          fi
+
+      # ---- 6. SSH 到 bbpad 服务器：拉新 memos 镜像 + 重启 memos 服务（只动 memos）----
+      - name: Deploy memos to server
+        if: steps.deploy-config.outputs.enabled == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd "${{ secrets.DEPLOY_PATH }}"
+            docker compose -f docker-compose.prod.yml pull memos
+            docker compose -f docker-compose.prod.yml up -d memos
+            docker image prune -f

@@ -26,6 +26,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: 阿里云部署   # 沿用你配了 DEPLOY_* secrets 的环境，否则环境密钥读不到
     steps:
       - uses: actions/checkout@v6
 

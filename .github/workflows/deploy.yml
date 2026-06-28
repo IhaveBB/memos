@@ -16,8 +16,9 @@ permissions:
   packages: write # 推送到 GHCR 所需
 
 env:
-  # -> ghcr.io/ihavebb/memos （仓库名小写，GHCR 要求）
-  IMAGE: ghcr.io/${{ github.repository }}
+  # GHCR 要求镜像名全小写。你的 GitHub 登录是 IhaveBB（含大写），GHCR 包名用小写 ihavebb。
+  # 若改了用户名，这里和 scripts/compose.yaml 一起改。
+  IMAGE: ghcr.io/ihavebb/memos
 
 jobs:
   build-and-deploy:

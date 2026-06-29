@@ -30,6 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # 从 release-please manifest 读官方版本号（如 0.29.1），用作构建版本号，
+      # 让显示版本与官方一致；以后同步上游、manifest 更新，版本自动跟随。
+      - name: Read version
+        id: version
+        run: echo "v=$(jq -r '.["."]' .release-please-manifest.json)" >> "$GITHUB_OUTPUT"
+
       # ---- 1. 编前端：产物落到 server/router/frontend/dist（Dockerfile 会 embed）----
       - uses: pnpm/action-setup@v4.2.0
         with:
@@ -71,7 +77,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            VERSION=${{ github.ref_name }}
+            VERSION=${{ steps.version.outputs.v }}
             COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

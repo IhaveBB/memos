@@ -516,7 +516,7 @@
       "endpoint": "端点（Endpoint）",
       "endpoint-description": "服务端点，例如 AWS S3、Cloudflare R2、MinIO 或其它兼容服务链接。",
       "filepath-template": "文件路径模板",
-      "filepath-template-description": "本地文件系统和 S3 都会使用该模板。支持 {timestamp}、{uuid} 和 {filename}。默认值：assets/{timestamp}_{uuid}_{filename}。",
+      "filepath-template-description": "本地文件系统和 S3 都会使用该模板。可用占位符：{timestamp}、{year}、{month}、{day}、{hour}、{minute}、{second}、{uuid}、{filename}、{md5}（文件内容哈希）、{ext}/{extname}（不含点的扩展名）。默认值：assets/{timestamp}_{uuid}_{filename}。",
       "local-storage-path": "本地存储路径",
       "local-description": "将新附件保存在服务器文件系统中。新实例默认使用这种方式。",
       "local-note-backup": "请持久化并备份附件目录，Docker 或容器化部署尤其需要注意。",

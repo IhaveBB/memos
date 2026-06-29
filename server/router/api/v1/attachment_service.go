@@ -3,6 +3,7 @@ package v1
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
 	"encoding/binary"
 	"fmt"
 	"image"
@@ -448,10 +449,12 @@ func SaveAttachmentBlob(ctx context.Context, profile *profile.Profile, stores *s
 		}
 
 		internalPath := filepathTemplate
-		if !strings.Contains(internalPath, "{filename}") {
+		// 仅当模板既没指定 {filename}、也没用 {ext} 定义扩展名时才补 {filename}，
+		// 否则像 luntan/{year}/{month}/{md5}.{ext} 这种自定义文件名会被错误追加。
+		if !strings.Contains(internalPath, "{filename}") && !strings.Contains(internalPath, "{ext}") {
 			internalPath = filepath.Join(internalPath, "{filename}")
 		}
-		internalPath = replaceFilenameWithPathTemplate(internalPath, create.Filename)
+		internalPath = replaceFilenameWithPathTemplate(internalPath, create.Filename, create.Blob)
 		internalPath = filepath.ToSlash(internalPath)
 
 		// Ensure the directory exists.
@@ -491,10 +494,10 @@ func SaveAttachmentBlob(ctx context.Context, profile *profile.Profile, stores *s
 		}
 
 		filepathTemplate := instanceStorageSetting.FilepathTemplate
-		if !strings.Contains(filepathTemplate, "{filename}") {
+		if !strings.Contains(filepathTemplate, "{filename}") && !strings.Contains(filepathTemplate, "{ext}") {
 			filepathTemplate = filepath.Join(filepathTemplate, "{filename}")
 		}
-		filepathTemplate = replaceFilenameWithPathTemplate(filepathTemplate, create.Filename)
+		filepathTemplate = replaceFilenameWithPathTemplate(filepathTemplate, create.Filename, create.Blob)
 		key, err := s3Client.UploadObject(ctx, filepathTemplate, create.Type, bytes.NewReader(create.Blob))
 		if err != nil {
 			return errors.Wrap(err, "Failed to upload via s3 client")
@@ -585,9 +588,9 @@ func (s *APIV1Service) GetAttachmentBlob(attachment *store.Attachment) ([]byte, 
 	return attachment.Blob, nil
 }
 
-var fileKeyPattern = regexp.MustCompile(`\{[a-z]{1,9}\}`)
+var fileKeyPattern = regexp.MustCompile(`\{[a-z0-9]{1,9}\}`)
 
-func replaceFilenameWithPathTemplate(path, filename string) string {
+func replaceFilenameWithPathTemplate(path, filename string, blob []byte) string {
 	t := time.Now()
 	path = fileKeyPattern.ReplaceAllStringFunc(path, func(s string) string {
 		switch s {
@@ -609,6 +612,12 @@ func replaceFilenameWithPathTemplate(path, filename string) string {
 			return fmt.Sprintf("%02d", t.Second())
 		case "{uuid}":
 			return util.GenUUID()
+		case "{md5}":
+			// 文件内容的 MD5（十六进制），适合做去重友好的稳定文件名。
+			return fmt.Sprintf("%x", md5.Sum(blob))
+		case "{ext}", "{extname}":
+			// 扩展名（不含点），如 jpg/png/webp；取自原始文件名。
+			return strings.TrimPrefix(filepath.Ext(filename), ".")
 		default:
 			return s
 		}

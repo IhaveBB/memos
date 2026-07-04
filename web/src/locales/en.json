@@ -190,8 +190,6 @@
     "saving": "Saving...",
     "unsupported-syntax-raw-mode": "This memo contains syntax the rich-text editor can't safely edit, so it opened in raw Markdown mode.",
     "visibility": {
-      "confirm-public-title": "Confirm Public Visibility",
-      "confirm-public-description": "This memo will be visible to everyone, including anonymous visitors. Are you sure?",
       "privacy-lock-confirm-title": "Privacy Lock Active",
       "privacy-lock-confirm-description": "Privacy lock is enabled. This memo will be visible to others. Are you sure you want to make it public?"
     },

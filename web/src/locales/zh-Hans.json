@@ -136,8 +136,6 @@
     "save": "保存",
     "saving": "保存中...",
     "visibility": {
-      "confirm-public-title": "确认公开",
-      "confirm-public-description": "此 Memo 将对所有人可见（包括未登录用户）。确定要公开吗？",
       "privacy-lock-confirm-title": "隐私锁已开启",
       "privacy-lock-confirm-description": "隐私锁已启用。此 Memo 将对其他人可见。确定要公开吗？"
     },

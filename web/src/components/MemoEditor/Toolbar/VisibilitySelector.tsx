@@ -22,7 +22,8 @@ const VisibilitySelector = (props: VisibilitySelectorProps) => {
   const currentLabel = visibilityOptions.find((option) => option.value === value)?.label || "";
 
   const handleOptionClick = (target: Visibility) => {
-    if (target === Visibility.PUBLIC && value !== Visibility.PUBLIC) {
+    // Only show confirmation when privacy lock is enabled and switching to PUBLIC
+    if (privacyLock && target === Visibility.PUBLIC && value !== Visibility.PUBLIC) {
       setPendingVisibility(target);
       setConfirmOpen(true);
     } else {
@@ -62,8 +63,8 @@ const VisibilitySelector = (props: VisibilitySelectorProps) => {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={privacyLock ? t("editor.visibility.privacy-lock-confirm-title") : t("editor.visibility.confirm-public-title")}
-        description={privacyLock ? t("editor.visibility.privacy-lock-confirm-description") : t("editor.visibility.confirm-public-description")}
+        title={t("editor.visibility.privacy-lock-confirm-title")}
+        description={t("editor.visibility.privacy-lock-confirm-description")}
         confirmLabel={t("common.confirm")}
         cancelLabel={t("common.cancel")}
         onConfirm={handleConfirm}

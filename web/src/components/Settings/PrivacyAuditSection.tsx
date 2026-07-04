@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { memoServiceClient } from "@/connect";
+import { buildMemoCreatorFilter } from "@/helpers/resource-names";
 import { handleError } from "@/lib/error";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import type { Memo } from "@/types/proto/api/v1/memo_service_pb";
@@ -27,7 +28,8 @@ const PrivacyAuditSection = () => {
     if (!currentUser) return;
     setLoading(true);
     try {
-      const filterStr = `creator == "users/${encodeURIComponent(currentUser.username)}" && visibility in ["PUBLIC", "PROTECTED"]`;
+      const creatorFilter = buildMemoCreatorFilter(currentUser.name);
+      const filterStr = creatorFilter ? `${creatorFilter} && visibility in ["PUBLIC", "PROTECTED"]` : `visibility in ["PUBLIC", "PROTECTED"]`;
       const resp = await memoServiceClient.listMemos(
         create(ListMemosRequestSchema, {
           filter: filterStr,

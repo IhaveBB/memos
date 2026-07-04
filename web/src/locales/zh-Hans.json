@@ -135,6 +135,12 @@
     "no-changes-detected": "未检测到更改",
     "save": "保存",
     "saving": "保存中...",
+    "visibility": {
+      "confirm-public-title": "确认公开",
+      "confirm-public-description": "此 Memo 将对所有人可见（包括未登录用户）。确定要公开吗？",
+      "privacy-lock-confirm-title": "隐私锁已开启",
+      "privacy-lock-confirm-description": "隐私锁已启用。此 Memo 将对其他人可见。确定要公开吗？"
+    },
     "insert-menu": {
       "add-location": "添加位置",
       "link-memo": "链接备忘录",
@@ -230,7 +236,8 @@
       "disabled": "已禁用公开备忘录",
       "private": "私有",
       "protected": "工作区",
-      "public": "公开"
+      "public": "公开",
+      "public-warning": "此 Memo 对所有人公开可见"
     },
     "outline": "概要",
     "share": {
@@ -419,12 +426,26 @@
       "default-memo-sort-option": "备忘录显示时间",
       "default-memo-visibility": "默认备忘录可见性",
       "default-memo-visibility-description": "创建新备忘录时默认使用的可见性，仍可在编辑器中调整。",
+      "privacy-lock": "隐私锁",
+      "privacy-lock-description": "开启后，所有新建备忘录强制为私有。将可见性更改为公开需要确认。",
       "language-description": "立即更新界面语言，并保存到当前账号。",
       "memo-defaults-description": "设置创建新备忘录时使用的默认值。",
       "memo-defaults-title": "备忘录默认值",
       "theme-description": "立即在当前设备上应用所选主题。",
       "theme": "主题",
       "label": "偏好设置"
+    },
+    "privacy-audit": {
+      "title": "隐私审计",
+      "label": "隐私审计",
+      "description": "查看所有非私有的备忘录，确保它们的可见性符合预期。",
+      "public-count": "{{count}} 条公开备忘录",
+      "protected-count": "{{count}} 条工作区备忘录",
+      "no-public-memos": "所有备忘录都是私有的。您的隐私已受到保护！🔒",
+      "change-to-private": "设为私有",
+      "filter-all": "全部",
+      "filter-public": "公开",
+      "filter-protected": "工作区"
     },
     "shortcut": {
       "delete-confirm": "您确定要删除捷径 `{{title}}` 吗？",

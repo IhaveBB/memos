@@ -71,4 +71,5 @@ export interface VisibilitySelectorProps {
   value: Visibility;
   onChange: (visibility: Visibility) => void;
   onOpenChange?: (open: boolean) => void;
+  privacyLock?: boolean;
 }

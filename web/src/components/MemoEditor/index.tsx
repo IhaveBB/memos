@@ -10,6 +10,7 @@ import { userKeys } from "@/hooks/useUserQueries";
 import { handleError } from "@/lib/error";
 import { cn } from "@/lib/utils";
 import { InstanceSetting_Key } from "@/types/proto/api/v1/instance_service_pb";
+import { Visibility } from "@/types/proto/api/v1/memo_service_pb";
 import { useTranslate } from "@/utils/i18n";
 import { convertVisibilityFromString } from "@/utils/memo";
 import {
@@ -73,7 +74,12 @@ const MemoEditorImpl: React.FC<MemoEditorProps> = ({
   }, [aiSetting.providers, aiSetting.transcription?.providerId]);
 
   // Get default visibility from user settings
-  const defaultVisibility = userGeneralSetting?.memoVisibility ? convertVisibilityFromString(userGeneralSetting.memoVisibility) : undefined;
+  // When privacy lock is enabled, force PRIVATE regardless of user's default
+  const defaultVisibility = userGeneralSetting?.privacyLock
+    ? Visibility.PRIVATE
+    : userGeneralSetting?.memoVisibility
+      ? convertVisibilityFromString(userGeneralSetting.memoVisibility)
+      : undefined;
 
   const { isInitialized } = useMemoInit({
     editorRef,

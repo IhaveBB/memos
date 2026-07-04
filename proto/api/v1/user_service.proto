@@ -459,6 +459,8 @@ message UserSetting {
     // This references a CSS file in the web/public/themes/ directory.
     // If not set, the default theme will be used.
     string theme = 4 [(google.api.field_behavior) = OPTIONAL];
+    // When enabled, new memos are forced to private and changing visibility to public requires confirmation.
+    bool privacy_lock = 5 [(google.api.field_behavior) = OPTIONAL];
   }
 
   // Tag metadata for user-specific display rules.

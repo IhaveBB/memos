@@ -457,6 +457,7 @@ func getDefaultUserGeneralSetting() *v1pb.UserSetting_GeneralSetting {
 		Locale:         "en",
 		MemoVisibility: "PRIVATE",
 		Theme:          "",
+		PrivacyLock:    false,
 	}
 }
 
@@ -638,6 +639,8 @@ func (s *APIV1Service) UpdateUserSetting(ctx context.Context, request *v1pb.Upda
 				updatedGeneral.Theme = incomingGeneral.Theme
 			case "locale":
 				updatedGeneral.Locale = incomingGeneral.Locale
+			case "privacy_lock":
+				updatedGeneral.PrivacyLock = incomingGeneral.PrivacyLock
 			default:
 				// Ignore unsupported fields.
 			}
@@ -1494,6 +1497,7 @@ func convertUserSettingFromStore(storeSetting *storepb.UserSetting, user *store.
 					Locale:         general.Locale,
 					MemoVisibility: general.MemoVisibility,
 					Theme:          general.Theme,
+					PrivacyLock:    general.PrivacyLock,
 				},
 			}
 		} else {
@@ -1547,6 +1551,7 @@ func convertUserSettingToStore(apiSetting *v1pb.UserSetting, userID int32, key s
 					Locale:         general.Locale,
 					MemoVisibility: general.MemoVisibility,
 					Theme:          general.Theme,
+					PrivacyLock:    general.PrivacyLock,
 				},
 			}
 		} else {

@@ -9,7 +9,7 @@ export const convertVisibilityFromString = (visibility: string) => {
     case "PRIVATE":
       return Visibility.PRIVATE;
     default:
-      return Visibility.PUBLIC;
+      return Visibility.PRIVATE;
   }
 };
 

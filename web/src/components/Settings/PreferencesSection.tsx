@@ -1,5 +1,6 @@
 import { create } from "@bufbuild/protobuf";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateUserGeneralSetting } from "@/hooks/useUserQueries";
 import { Visibility } from "@/types/proto/api/v1/memo_service_pb";
@@ -58,6 +59,17 @@ const PreferencesSection = () => {
     );
   };
 
+  const handlePrivacyLockChanged = (checked: boolean) => {
+    updateUserGeneralSetting(
+      { generalSetting: { privacyLock: checked }, updateMask: ["privacy_lock"] },
+      {
+        onSuccess: () => {
+          refetchSettings();
+        },
+      },
+    );
+  };
+
   // Provide default values if setting is not loaded yet
   const setting: UserSetting_GeneralSetting =
     generalSetting ||
@@ -108,6 +120,14 @@ const PreferencesSection = () => {
                   ))}
               </SelectContent>
             </Select>
+          </SettingListItem>
+        </SettingList>
+      </SettingGroup>
+
+      <SettingGroup showSeparator>
+        <SettingList>
+          <SettingListItem label={t("setting.preference.privacy-lock")} description={t("setting.preference.privacy-lock-description")}>
+            <Switch checked={setting.privacyLock} onCheckedChange={handlePrivacyLockChanged} />
           </SettingListItem>
         </SettingList>
       </SettingGroup>

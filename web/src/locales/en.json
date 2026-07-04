@@ -189,6 +189,12 @@
     "save": "Save",
     "saving": "Saving...",
     "unsupported-syntax-raw-mode": "This memo contains syntax the rich-text editor can't safely edit, so it opened in raw Markdown mode.",
+    "visibility": {
+      "confirm-public-title": "Confirm Public Visibility",
+      "confirm-public-description": "This memo will be visible to everyone, including anonymous visitors. Are you sure?",
+      "privacy-lock-confirm-title": "Privacy Lock Active",
+      "privacy-lock-confirm-description": "Privacy lock is enabled. This memo will be visible to others. Are you sure you want to make it public?"
+    },
     "wysiwyg-editor": "WYSIWYG Editor",
     "audio-recorder": {
       "attachment-label": "Audio recording",
@@ -326,7 +332,8 @@
       "disabled": "Public memos are disabled",
       "private": "Private",
       "protected": "Protected",
-      "public": "Public"
+      "public": "Public",
+      "public-warning": "This memo is publicly visible to everyone"
     }
   },
   "message": {
@@ -584,12 +591,26 @@
       "default-memo-sort-option": "Memo display time",
       "default-memo-visibility": "Default memo visibility",
       "default-memo-visibility-description": "Visibility applied to newly created memos unless changed in the editor.",
+      "privacy-lock": "Privacy Lock",
+      "privacy-lock-description": "When enabled, all new memos are forced to private. Changing visibility to public requires confirmation.",
       "label": "Preferences",
       "language-description": "Updates the interface language immediately and saves it to your account.",
       "memo-defaults-description": "Set the defaults used when composing new memos.",
       "memo-defaults-title": "Memo defaults",
       "theme-description": "Applies the selected theme immediately on this device.",
       "theme": "Theme"
+    },
+    "privacy-audit": {
+      "title": "Privacy Audit",
+      "label": "Privacy Audit",
+      "description": "Review all your non-private memos to ensure they are intended to be visible.",
+      "public-count": "{{count}} public memos",
+      "protected-count": "{{count}} protected memos",
+      "no-public-memos": "All your memos are private. Your privacy is protected! 🔒",
+      "change-to-private": "Set to Private",
+      "filter-all": "All",
+      "filter-public": "Public",
+      "filter-protected": "Protected"
     },
     "shortcut": {
       "delete-confirm": "Are you sure you want to delete shortcut `{{title}}`?",

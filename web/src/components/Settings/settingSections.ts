@@ -7,6 +7,7 @@ import {
   LibraryIcon,
   type LucideIcon,
   MailIcon,
+  ShieldCheckIcon,
   Settings2Icon,
   TagsIcon,
   UserIcon,
@@ -21,6 +22,7 @@ import MemoRelatedSettings from "@/components/Settings/MemoRelatedSettings";
 import MyAccountSection from "@/components/Settings/MyAccountSection";
 import NotificationSection from "@/components/Settings/NotificationSection";
 import PreferencesSection from "@/components/Settings/PreferencesSection";
+import PrivacyAuditSection from "@/components/Settings/PrivacyAuditSection";
 import ResourceStatsSection from "@/components/Settings/ResourceStatsSection";
 import SSOSection from "@/components/Settings/SSOSection";
 import StorageSection from "@/components/Settings/StorageSection";
@@ -40,7 +42,8 @@ export type SettingSectionKey =
   | "sso"
   | "tags"
   | "ai"
-  | "resource-stats";
+  | "resource-stats"
+  | "privacy-audit";
 
 type SettingSectionScope = "basic" | "admin";
 
@@ -140,6 +143,13 @@ export const SETTINGS_SECTIONS: SettingSectionDefinition[] = [
     labelKey: "setting.resource-stats.label",
     icon: BarChart3Icon,
     component: ResourceStatsSection,
+  },
+  {
+    key: "privacy-audit",
+    scope: "basic",
+    labelKey: "setting.privacy-audit.label",
+    icon: ShieldCheckIcon,
+    component: PrivacyAuditSection,
   },
 ];
 

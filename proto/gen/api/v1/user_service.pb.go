@@ -2958,7 +2958,7 @@ type UserStats_MemoTypeStats struct {
 
 func (x *UserStats_MemoTypeStats) Reset() {
 	*x = UserStats_MemoTypeStats{}
-	mi := &file_api_v1_user_service_proto_msgTypes[43]
+	mi := &file_api_v1_user_service_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2970,7 +2970,7 @@ func (x *UserStats_MemoTypeStats) String() string {
 func (*UserStats_MemoTypeStats) ProtoMessage() {}
 
 func (x *UserStats_MemoTypeStats) ProtoReflect() protoreflect.Message {
-	mi := &file_api_v1_user_service_proto_msgTypes[43]
+	mi := &file_api_v1_user_service_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2983,7 +2983,7 @@ func (x *UserStats_MemoTypeStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserStats_MemoTypeStats.ProtoReflect.Descriptor instead.
 func (*UserStats_MemoTypeStats) Descriptor() ([]byte, []int) {
-	return file_api_v1_user_service_proto_rawDescGZIP(), []int{9, 0}
+	return file_api_v1_user_service_proto_rawDescGZIP(), []int{9, 1}
 }
 
 func (x *UserStats_MemoTypeStats) GetLinkCount() int32 {
@@ -3024,7 +3024,9 @@ type UserSetting_GeneralSetting struct {
 	// The preferred theme of the user.
 	// This references a CSS file in the web/public/themes/ directory.
 	// If not set, the default theme will be used.
-	Theme         string `protobuf:"bytes,4,opt,name=theme,proto3" json:"theme,omitempty"`
+	Theme string `protobuf:"bytes,4,opt,name=theme,proto3" json:"theme,omitempty"`
+	// When enabled, new memos are forced to private and changing visibility to public requires confirmation.
+	PrivacyLock   bool `protobuf:"varint,5,opt,name=privacy_lock,json=privacyLock,proto3" json:"privacy_lock,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3078,6 +3080,13 @@ func (x *UserSetting_GeneralSetting) GetTheme() string {
 		return x.Theme
 	}
 	return ""
+}
+
+func (x *UserSetting_GeneralSetting) GetPrivacyLock() bool {
+	if x != nil {
+		return x.PrivacyLock
+	}
+	return false
 }
 
 // Tag metadata for user-specific display rules.
@@ -3444,7 +3453,10 @@ const file_api_v1_user_service_proto_rawDesc = "" +
 	"\x17memo_created_timestamps\x18\a \x03(\v2\x1a.google.protobuf.TimestampR\x15memoCreatedTimestamps\x12R\n" +
 	"\x17memo_updated_timestamps\x18\b \x03(\v2\x1a.google.protobuf.TimestampR\x15memoUpdatedTimestamps\x12!\n" +
 	"\fpinned_memos\x18\x05 \x03(\tR\vpinnedMemos\x12(\n" +
-	"\x10total_memo_count\x18\x06 \x01(\x05R\x0etotalMemoCount\x1a\x8b\x01\n" +
+	"\x10total_memo_count\x18\x06 \x01(\x05R\x0etotalMemoCount\x1a;\n" +
+	"\rTagCountEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\x1a\x8b\x01\n" +
 	"\rMemoTypeStats\x12\x1d\n" +
 	"\n" +
 	"link_count\x18\x01 \x01(\x05R\tlinkCount\x12\x1d\n" +
@@ -3453,10 +3465,7 @@ const file_api_v1_user_service_proto_rawDesc = "" +
 	"\n" +
 	"todo_count\x18\x03 \x01(\x05R\ttodoCount\x12\x1d\n" +
 	"\n" +
-	"undo_count\x18\x04 \x01(\x05R\tundoCount\x1a;\n" +
-	"\rTagCountEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01:?\xeaA<\n" +
+	"undo_count\x18\x04 \x01(\x05R\tundoCount:?\xeaA<\n" +
 	"\x16memos.api.v1/UserStats\x12\fusers/{user}*\tuserStats2\tuserStatsJ\x04\b\x02\x10\x03R\x17memo_display_timestamps\"D\n" +
 	"\x13GetUserStatsRequest\x12-\n" +
 	"\x04name\x18\x01 \x01(\tB\x19\xe0A\x02\xfaA\x13\n" +
@@ -3465,16 +3474,17 @@ const file_api_v1_user_service_proto_rawDesc = "" +
 	"\x05state\x18\x01 \x01(\x0e2\x13.memos.api.v1.StateB\x03\xe0A\x01R\x05state\x12\x1b\n" +
 	"\x06filter\x18\x02 \x01(\tB\x03\xe0A\x01R\x06filter\"I\n" +
 	"\x18ListAllUserStatsResponse\x12-\n" +
-	"\x05stats\x18\x01 \x03(\v2\x17.memos.api.v1.UserStatsR\x05stats\"\xbf\a\n" +
+	"\x05stats\x18\x01 \x03(\v2\x17.memos.api.v1.UserStatsR\x05stats\"\xe8\a\n" +
 	"\vUserSetting\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tB\x03\xe0A\bR\x04name\x12S\n" +
 	"\x0fgeneral_setting\x18\x02 \x01(\v2(.memos.api.v1.UserSetting.GeneralSettingH\x00R\x0egeneralSetting\x12V\n" +
 	"\x10webhooks_setting\x18\x05 \x01(\v2).memos.api.v1.UserSetting.WebhooksSettingH\x00R\x0fwebhooksSetting\x12J\n" +
-	"\ftags_setting\x18\x06 \x01(\v2%.memos.api.v1.UserSetting.TagsSettingH\x00R\vtagsSetting\x1av\n" +
+	"\ftags_setting\x18\x06 \x01(\v2%.memos.api.v1.UserSetting.TagsSettingH\x00R\vtagsSetting\x1a\x9e\x01\n" +
 	"\x0eGeneralSetting\x12\x1b\n" +
 	"\x06locale\x18\x01 \x01(\tB\x03\xe0A\x01R\x06locale\x12,\n" +
 	"\x0fmemo_visibility\x18\x03 \x01(\tB\x03\xe0A\x01R\x0ememoVisibility\x12\x19\n" +
-	"\x05theme\x18\x04 \x01(\tB\x03\xe0A\x01R\x05theme\x1ay\n" +
+	"\x05theme\x18\x04 \x01(\tB\x03\xe0A\x01R\x05theme\x12&\n" +
+	"\fprivacy_lock\x18\x05 \x01(\bB\x03\xe0A\x01R\vprivacyLock\x1ay\n" +
 	"\vTagMetadata\x12B\n" +
 	"\x10background_color\x18\x01 \x01(\v2\x12.google.type.ColorB\x03\xe0A\x01R\x0fbackgroundColor\x12&\n" +
 	"\fblur_content\x18\x02 \x01(\bB\x03\xe0A\x01R\vblurContent\x1a\xb7\x01\n" +
@@ -3739,8 +3749,8 @@ var file_api_v1_user_service_proto_goTypes = []any{
 	(*ListUserNotificationsResponse)(nil),       // 44: memos.api.v1.ListUserNotificationsResponse
 	(*UpdateUserNotificationRequest)(nil),       // 45: memos.api.v1.UpdateUserNotificationRequest
 	(*DeleteUserNotificationRequest)(nil),       // 46: memos.api.v1.DeleteUserNotificationRequest
-	(*UserStats_MemoTypeStats)(nil),             // 47: memos.api.v1.UserStats.MemoTypeStats
-	nil,                                         // 48: memos.api.v1.UserStats.TagCountEntry
+	nil,                                         // 47: memos.api.v1.UserStats.TagCountEntry
+	(*UserStats_MemoTypeStats)(nil),             // 48: memos.api.v1.UserStats.MemoTypeStats
 	(*UserSetting_GeneralSetting)(nil),          // 49: memos.api.v1.UserSetting.GeneralSetting
 	(*UserSetting_TagMetadata)(nil),             // 50: memos.api.v1.UserSetting.TagMetadata
 	(*UserSetting_TagsSetting)(nil),             // 51: memos.api.v1.UserSetting.TagsSetting
@@ -3765,8 +3775,8 @@ var file_api_v1_user_service_proto_depIdxs = []int32{
 	4,  // 7: memos.api.v1.CreateUserRequest.user:type_name -> memos.api.v1.User
 	4,  // 8: memos.api.v1.UpdateUserRequest.user:type_name -> memos.api.v1.User
 	58, // 9: memos.api.v1.UpdateUserRequest.update_mask:type_name -> google.protobuf.FieldMask
-	47, // 10: memos.api.v1.UserStats.memo_type_stats:type_name -> memos.api.v1.UserStats.MemoTypeStats
-	48, // 11: memos.api.v1.UserStats.tag_count:type_name -> memos.api.v1.UserStats.TagCountEntry
+	48, // 10: memos.api.v1.UserStats.memo_type_stats:type_name -> memos.api.v1.UserStats.MemoTypeStats
+	47, // 11: memos.api.v1.UserStats.tag_count:type_name -> memos.api.v1.UserStats.TagCountEntry
 	57, // 12: memos.api.v1.UserStats.memo_created_timestamps:type_name -> google.protobuf.Timestamp
 	57, // 13: memos.api.v1.UserStats.memo_updated_timestamps:type_name -> google.protobuf.Timestamp
 	56, // 14: memos.api.v1.ListAllUserStatsRequest.state:type_name -> memos.api.v1.State

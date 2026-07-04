@@ -45,6 +45,8 @@ message GeneralUserSetting {
   // The user's theme preference.
   // This references a CSS file in the web/public/themes/ directory.
   string theme = 3;
+  // When enabled, new memos are forced to private and changing visibility to public requires confirmation.
+  bool privacy_lock = 4;
 }
 
 message UserTagMetadata {

@@ -1,4 +1,4 @@
-import { BookmarkIcon } from "lucide-react";
+import { BookmarkIcon, Globe2Icon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -77,16 +77,25 @@ const MemoHeader: React.FC<MemoHeaderProps> = ({ showCreator, showVisibility, sh
           />
         )}
 
-        {showVisibility && memo.visibility !== Visibility.PRIVATE && (
+        {showVisibility && memo.visibility === Visibility.PUBLIC && (
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 hover:opacity-80 transition-colors">
+                <Globe2Icon className="w-3.5 h-3.5" />
+                <span>{t("memo.visibility.public")}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t("memo.visibility.public-warning")}</TooltipContent>
+          </Tooltip>
+        )}
+        {showVisibility && memo.visibility === Visibility.PROTECTED && (
           <Tooltip>
             <TooltipTrigger>
               <span className="flex justify-center items-center rounded-md hover:opacity-80">
                 <VisibilityIcon visibility={memo.visibility} />
               </span>
             </TooltipTrigger>
-            <TooltipContent>
-              {t(`memo.visibility.${convertVisibilityToString(memo.visibility).toLowerCase()}` as Parameters<typeof t>[0])}
-            </TooltipContent>
+            <TooltipContent>{t("memo.visibility.protected")}</TooltipContent>
           </Tooltip>
         )}
 

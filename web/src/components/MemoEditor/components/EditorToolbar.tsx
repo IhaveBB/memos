@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Location, Visibility } from "@/types/proto/api/v1/memo_service_pb";
 import { useTranslate } from "@/utils/i18n";
 import { validationService } from "../services";
@@ -10,6 +11,7 @@ import type { EditorToolbarProps } from "../types";
 
 export const EditorToolbar: FC<EditorToolbarProps> = ({ onSave, onCancel, memoName, onAudioRecorderClick }) => {
   const t = useTranslate();
+  const { userGeneralSetting } = useAuth();
   const { actions, dispatch } = useEditorContext();
   // Subscribe to narrow/derived slices so typing (which only changes content)
   // doesn't re-render the toolbar or the heavy InsertMenu it hosts. `valid`
@@ -43,7 +45,7 @@ export const EditorToolbar: FC<EditorToolbarProps> = ({ onSave, onCancel, memoNa
           memoName={memoName}
           onAudioRecorderClick={onAudioRecorderClick}
         />
-        <VisibilitySelector value={visibility} onChange={handleVisibilityChange} />
+        <VisibilitySelector value={visibility} onChange={handleVisibilityChange} privacyLock={userGeneralSetting?.privacyLock} />
       </div>
 
       <div className="flex flex-row justify-end items-center gap-2">

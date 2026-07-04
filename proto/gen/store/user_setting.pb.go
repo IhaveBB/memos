@@ -260,7 +260,9 @@ type GeneralUserSetting struct {
 	MemoVisibility string `protobuf:"bytes,2,opt,name=memo_visibility,json=memoVisibility,proto3" json:"memo_visibility,omitempty"`
 	// The user's theme preference.
 	// This references a CSS file in the web/public/themes/ directory.
-	Theme         string `protobuf:"bytes,3,opt,name=theme,proto3" json:"theme,omitempty"`
+	Theme string `protobuf:"bytes,3,opt,name=theme,proto3" json:"theme,omitempty"`
+	// When enabled, new memos are forced to private and changing visibility to public requires confirmation.
+	PrivacyLock   bool `protobuf:"varint,4,opt,name=privacy_lock,json=privacyLock,proto3" json:"privacy_lock,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -314,6 +316,13 @@ func (x *GeneralUserSetting) GetTheme() string {
 		return x.Theme
 	}
 	return ""
+}
+
+func (x *GeneralUserSetting) GetPrivacyLock() bool {
+	if x != nil {
+		return x.PrivacyLock
+	}
+	return false
 }
 
 type UserTagMetadata struct {
@@ -1002,11 +1011,12 @@ const file_store_user_setting_proto_rawDesc = "" +
 	"\x0eREFRESH_TOKENS\x10\x06\x12\x1a\n" +
 	"\x16PERSONAL_ACCESS_TOKENS\x10\a\x12\b\n" +
 	"\x04TAGS\x10\bB\a\n" +
-	"\x05value\"k\n" +
+	"\x05value\"\x8e\x01\n" +
 	"\x12GeneralUserSetting\x12\x16\n" +
 	"\x06locale\x18\x01 \x01(\tR\x06locale\x12'\n" +
 	"\x0fmemo_visibility\x18\x02 \x01(\tR\x0ememoVisibility\x12\x14\n" +
-	"\x05theme\x18\x03 \x01(\tR\x05theme\"s\n" +
+	"\x05theme\x18\x03 \x01(\tR\x05theme\x12!\n" +
+	"\fprivacy_lock\x18\x04 \x01(\bR\vprivacyLock\"s\n" +
 	"\x0fUserTagMetadata\x12=\n" +
 	"\x10background_color\x18\x01 \x01(\v2\x12.google.type.ColorR\x0fbackgroundColor\x12!\n" +
 	"\fblur_content\x18\x02 \x01(\bR\vblurContent\"\xa4\x01\n" +

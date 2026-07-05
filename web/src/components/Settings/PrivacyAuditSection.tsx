@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { memoServiceClient } from "@/connect";
 import { buildMemoCreatorFilter } from "@/helpers/resource-names";
-import { handleError } from "@/lib/error";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import { handleError } from "@/lib/error";
 import type { Memo } from "@/types/proto/api/v1/memo_service_pb";
 import { ListMemosRequestSchema, MemoSchema, Visibility } from "@/types/proto/api/v1/memo_service_pb";
 import { useTranslate } from "@/utils/i18n";
@@ -26,17 +26,30 @@ const PrivacyAuditSection = () => {
 
   const fetchMemos = useCallback(async () => {
     if (!currentUser) return;
+    // Guard against an empty creator name: without a creator filter the query
+    // would match every user's public/protected memos, which is wrong for a
+    // per-user privacy audit. Bail out rather than over-fetching.
+    const creatorFilter = buildMemoCreatorFilter(currentUser.name);
+    if (!creatorFilter) return;
     setLoading(true);
     try {
-      const creatorFilter = buildMemoCreatorFilter(currentUser.name);
-      const filterStr = creatorFilter ? `${creatorFilter} && visibility in ["PUBLIC", "PROTECTED"]` : `visibility in ["PUBLIC", "PROTECTED"]`;
-      const resp = await memoServiceClient.listMemos(
-        create(ListMemosRequestSchema, {
-          filter: filterStr,
-          pageSize: 100,
-        } as Record<string, unknown>),
-      );
-      setMemos(resp.memos);
+      const filterStr = `${creatorFilter} && visibility in ["PUBLIC", "PROTECTED"]`;
+      // Page through all results so the audit is complete — a hard cap of 100
+      // would silently hide memos beyond the first page.
+      const allMemos: Memo[] = [];
+      let pageToken = "";
+      do {
+        const resp = await memoServiceClient.listMemos(
+          create(ListMemosRequestSchema, {
+            filter: filterStr,
+            pageSize: 100,
+            pageToken,
+          } as Record<string, unknown>),
+        );
+        allMemos.push(...resp.memos);
+        pageToken = resp.nextPageToken;
+      } while (pageToken);
+      setMemos(allMemos);
     } catch (error) {
       console.error("Failed to fetch memos for privacy audit:", error);
     } finally {
@@ -115,10 +128,13 @@ const PrivacyAuditSection = () => {
                   className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">{memo.content.slice(0, 100)}{memo.content.length > 100 ? "..." : ""}</p>
+                    <p className="text-sm truncate">
+                      {(memo.content ?? "").slice(0, 100)}
+                      {(memo.content?.length ?? 0) > 100 ? "..." : ""}
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-muted-foreground">
-                        {memo.createTime ? new Date(memo.createTime.seconds * 1000).toLocaleDateString() : ""}
+                        {memo.createTime ? new Date(Number(memo.createTime.seconds) * 1000).toLocaleDateString() : ""}
                       </span>
                       {memo.visibility === Visibility.PUBLIC && (
                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
@@ -134,12 +150,7 @@ const PrivacyAuditSection = () => {
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0"
-                    onClick={() => handleChangeVisibility(memo, Visibility.PRIVATE)}
-                  >
+                  <Button variant="outline" size="sm" className="shrink-0" onClick={() => handleChangeVisibility(memo, Visibility.PRIVATE)}>
                     <LockIcon className="w-3.5 h-3.5 mr-1" />
                     {t("setting.privacy-audit.change-to-private")}
                   </Button>

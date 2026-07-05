@@ -621,10 +621,15 @@ func (s *APIV1Service) UpdateUserSetting(ctx context.Context, request *v1pb.Upda
 			generalSetting = existingUserSetting.GetGeneral()
 		}
 
+		// Inherit all existing fields, then overwrite only the ones in the
+		// update mask below. PrivacyLock must be carried over too, otherwise
+		// updating an unrelated field (theme/locale/memo_visibility) would
+		// silently reset it to the bool zero value (false) on upsert.
 		updatedGeneral := &v1pb.UserSetting_GeneralSetting{
 			MemoVisibility: generalSetting.GetMemoVisibility(),
 			Locale:         generalSetting.GetLocale(),
 			Theme:          generalSetting.GetTheme(),
+			PrivacyLock:    generalSetting.GetPrivacyLock(),
 		}
 
 		incomingGeneral := request.Setting.GetGeneralSetting()
